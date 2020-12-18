@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>神魔之塔 卡片圖鑑</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/flatly/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/pascal-the-elf/TOS-API@latest/API/js/tos_api.min.js"></script>
+    <script>
+    var init = (async function(){
+        window.api = new tos_api();
+        await window.api.init();
+
+        window.params = {};
+        let s = (new URL(location)).searchParams;
+        for (let [k, v] of s) window.params[k] = v;
+        let sp = {};
+        if(params["attr"]) sp.attr = params["attr"];
+        if(params["race"]) sp.race = params["race"];
+        if(params["star"]) sp.star = params["star"];
+        if(!params["attr"] && !params["race"] && !params["star"]) sp = {star: "1,2,3,4,5,6,7,8"};
+        window.all_cards = window.api.card.search(sp);
+    })();
+    </script>
+</head>
+<body>
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="./">神魔之塔 卡片圖鑑</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbar1">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./">現時活動</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./gallery">卡片圖鑑</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./card">卡片檢視</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./team">組隊預覽</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <br>
+        <div id="loading">
+            <div class="loading-container"><div class="loading-spinner">
+                <div></div>
+            </div></div>
+        </div>
+        <div id="contents" class="container" style="display: none; max-width: 600px;">
+            <br>
+            <div id="filter" class="filter jumbotron">
+                <h3 style="font-size: 1.4rem;">篩選條件</h3>
+                <hr class="my-1">
+                <div class="form-group">
+                    <span>屬性：</span><br>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-attr-1" checked>
+                        <label class="custom-control-label" for="filter-attr-1">水 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-attr-2" checked>
+                        <label class="custom-control-label" for="filter-attr-2">火 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-attr-3" checked>
+                        <label class="custom-control-label" for="filter-attr-3">木 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-attr-4" checked>
+                        <label class="custom-control-label" for="filter-attr-4">光 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-attr-5" checked>
+                        <label class="custom-control-label" for="filter-attr-5">暗 </label>
+                    </div>
+                    <br>
+
+                    <span>種族：</span><br>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-5" checked>
+                        <label class="custom-control-label" for="filter-race-5">神族 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-8" checked>
+                        <label class="custom-control-label" for="filter-race-8">魔族 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-1" checked>
+                        <label class="custom-control-label" for="filter-race-1">人類 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-2" checked>
+                        <label class="custom-control-label" for="filter-race-2">獸類 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-4" checked>
+                        <label class="custom-control-label" for="filter-race-4">龍類 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-3" checked>
+                        <label class="custom-control-label" for="filter-race-3">妖精類 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-race-10" checked>
+                        <label class="custom-control-label" for="filter-race-10">機械族 </label>
+                    </div>
+                    <br>
+
+                    <span>稀有度：</span><br>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-1" checked>
+                        <label class="custom-control-label" for="filter-star-1">1 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-2" checked>
+                        <label class="custom-control-label" for="filter-star-2">2 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-3" checked>
+                        <label class="custom-control-label" for="filter-star-3">3 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-4" checked>
+                        <label class="custom-control-label" for="filter-star-4">4 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-5" checked>
+                        <label class="custom-control-label" for="filter-star-5">5 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-6" checked>
+                        <label class="custom-control-label" for="filter-star-6">6 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-7" checked>
+                        <label class="custom-control-label" for="filter-star-7">7 </label>
+                    </div>
+                    <div class="filter-opt custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="filter-star-8" checked>
+                        <label class="custom-control-label" for="filter-star-8">8 </label>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <a class="btn btn-primary" href="javascript:search()" role="button">篩選</a>
+                </div>
+            </div>
+            <div id="wrapper" style="width:100%; display: flex; flex-wrap: wrap; flex-direction: row; justify-content: flex-start; align-items: flex-start;"></div>
+            <div id="end_pad" style="height: 200px;"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/locale/zh-tw.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+    (async function() {
+        window.limit = 100;
+        await init;
+        if(params["nav"] && params["nav"] == "none") document.getElementsByClassName("navbar")[0].style.display = "none";
+        filter_check_sync();
+        build();
+    })();
+
+    async function add() {
+        await new Promise((sol, rej) => {
+            window.onscroll = function() {
+                if ((window.innerHeight + window.scrollY + 500) >= document.body.offsetHeight) {
+                    window.onscroll = function() {};
+                    sol();
+                }
+                if(window["release recollection"]) {
+                    window.onscroll = function() {};
+                    window.limit = 9899;
+                    console.log("RELEASE RECOLLECTION!!!!!!!");
+                    sol();
+                }
+            };
+        }).then(() => {window.limit += 100;});
+        return window.limit;
+    }
+
+    async function build() {
+        let cd = function(ms=20) {
+            return new Promise((sol, rej) => {
+                setTimeout(() => { sol() }, ms);
+            });
+        };
+        let ALL = await window.all_cards;
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("contents").style.display = "block";
+        if(ALL) {
+            for(let i = 0; i < ALL.length; i++) {
+                if(i >= window.limit) await add();
+                let item = ALL[i];
+                if(item) {
+                    let wrap = document.createElement("div");
+                    wrap.classList.add("card_wrap");
+                    let img = document.createElement("img");
+                    img.style.width = "100%";
+                    img.src = `https://web-assets.tosconfig.com/gallery/icons/${item.id.toString().padStart(4, "0")}.jpg`;
+                    let async_cont = function(ins) {
+                        window.api.card.get(item.id).then(data => {
+                            let card = data[item.id];
+                            let text = `<b><a class="text-white" href="card?id=${card.id}" target="_blank">${card.name}</a></b><br><br>`;
+                            text += `生命力/攻擊力/回復力：${card.stats_max.hp} / ${card.stats_max.attack} / ${card.stats_max.recovery}<br>`;
+                            if(card.skills.active && card.skills.active.length) {
+                                text += `主動技能：<br>`;
+                                card.skills.active.forEach((item, i) => {
+                                    text += `<b>${item.name}</b> <b style="color: orange; float: right;">${item.cd?"CD":"EP"} ${item.cd?item.cd.min:item.ep.min} / sLv ${item.cd?(item.cd.max-item.cd.min+1):(item.ep.max-item.ep.min+1)}</b><br>${item.effect.replace(/\n/g, " &nbsp; ")}<br><br>`;
+                                });
+                            }
+                            if(card.skills.leader && card.skills.leader.length) {
+                                text += `隊長技能：<br>`;
+                                card.skills.leader.forEach((item, i) => {
+                                    text += `<b>${item.name}</b><br>${item.effect.replace(/\n/g, " &nbsp; ")}<br><br>`;
+                                });
+                            }
+                            ins.setContent(text);
+                        });
+                    };
+                    tippy(wrap, {
+                        allowHTML: true,
+                        interactive: true,
+                        content: "載入中",
+                        maxWidth: 400,
+                        onShow: async_cont
+                    });
+                    wrap.appendChild(img);
+                    if(params["selector"]) {
+                        let select = document.createElement("a");
+                        select.innerHTML = "選擇";
+                        select.href = `javascript:select(${item.id})`;
+                        select.classList.add("select_tag");
+                        wrap.appendChild(select);
+                    }
+                    document.getElementById("wrapper").appendChild(wrap);
+                    if(window["release recollection"]) console.log("RELEASE RECOLLECTION!!!"+"!".repeat(Math.floor(Math.random()*5)));
+                    console.log("Card Placed, ID: "+item.id);
+                    await cd();
+                }
+            };
+        }
+    }
+
+    function filter_check_sync() {
+        if(params["attr"]) {
+            let attr = Object.assign(...params["attr"].split(",").map(k => ({ [k]: true })));
+            for(let i = 1; i <= 5; i++) {
+                try {
+                    if(!attr[i]) document.getElementById("filter-attr-"+i).checked = false;
+                } catch(e) {}
+            }
+        }
+        if(params["race"]) {
+            let race = Object.assign(...params["race"].split(",").map(k => ({ [k]: true })));
+            for(let i = 1; i <= 10; i++) {
+                try {
+                    if(!race[i]) document.getElementById("filter-race-"+i).checked = false;
+                } catch(e) {}
+            }
+        }
+        if(params["star"]) {
+            let star = Object.assign(...params["star"].split(",").map(k => ({ [k]: true })));
+            for(let i = 1; i <= 8; i++) {
+                try {
+                    if(!star[i]) document.getElementById("filter-star-"+i).checked = false;
+                } catch(e) {}
+            }
+        }
+        if(params["autochecked"] == "disabled") {
+            let elms = document.getElementsByClassName("custom-control-input");
+            for(let i = 0; i <= elms.length; i++) {
+                try {
+                    elms[i].checked = false;
+                } catch(e) {}
+            }
+        }
+    }
+
+    async function search() {
+        let attr = [];
+        for(let i = 1; i <= 5; i++) {
+            try {
+                let input = document.getElementById("filter-attr-"+i);
+                if(input.checked) attr.push(i);
+            } catch(e) {}
+        }
+
+        let race = [];
+        for(let i = 1; i <= 10; i++) {
+            try {
+                let input = document.getElementById("filter-race-"+i);
+                if(input.checked) race.push(i);
+            } catch(e) {}
+        }
+
+        let star = [];
+        for(let i = 1; i <= 8; i++) {
+            try {
+                let input = document.getElementById("filter-star-"+i);
+                if(input.checked) star.push(i);
+            } catch(e) {}
+        }
+
+        let des = `?attr=${attr.join(",")}&race=${race.join(",")}&star=${star.join(",")}`;
+        if(params["nav"]) des += `&nav=${params["nav"]}`;
+        if(params["session"]) des += `&session=${params["session"]}`;
+        if(params["selector"]) des += `&selector=${params["selector"]}`;
+        location.href = des;
+    }
+    function select(id=1) {
+        window.parent.postMessage({
+            session: params["session"],
+            card: id
+        }, "*");
+    }
+    </script>
+    <style>
+    @keyframes loading {
+        0% { transform: translate(-50%,-50%) rotate(0deg); }
+        100% { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+    .loading-container {
+        width: 50px;
+        height: 50px;
+        display: inline-block;
+        overflow: hidden;
+        background: none;
+        margin: 0 20px;
+    }
+    .loading-spinner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform: translateZ(0) scale(1);
+        backface-visibility: hidden;
+        transform-origin: 0 0;
+    }
+    .loading-spinner div {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 5px solid #1adcb6;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: loading 0.33s linear infinite;
+        top: 25px;
+        left: 25px;
+        box-sizing: content-box;
+    }
+    .card_wrap {
+        width: calc( 25% - 12px );
+        margin: 6px;
+    }
+    .card_wrap > img {
+        width: 100%
+    }
+    .filter {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    .filter-opt {
+        display: inline-block;
+        margin-right: 6px;
+    }
+    .select_tag {
+        color: white;
+        background-color: rgba(0,0,0,.7);
+        padding: 1px 2px;
+        font-size: 1.2rem;
+        border-radius: 3px;
+    }
+    .select_tag:hover {
+        color: white;
+    }
+    </style>
+</body>
+</html>

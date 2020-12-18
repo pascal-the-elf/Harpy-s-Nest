@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>神魔之塔 現時活動</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/flatly/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/pascal-the-elf/TOS-API@latest/API/js/tos_api.min.js"></script>
+    <script>
+    var init = (async function(){
+        window.api = new tos_api();
+        await window.api.init();
+        window.tos_event = window.api.event.get();
+    })();
+    </script>
+</head>
+<body>
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="./">神魔之塔 現時活動</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbar1">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./">現時活動</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./gallery">卡片圖鑑</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./card">卡片檢視</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./team">組隊預覽</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <br>
+        <div id="loading">
+            <div class="loading-container"><div class="loading-spinner">
+                <div></div>
+            </div></div>
+        </div>
+        <div id="contents" class="container" style="display: none;">
+            <h2>開放關卡</h2>
+            <div id="stages"></div>
+            <br>
+            <h2>石抽卡池</h2>
+            <div id="seals"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/locale/zh-tw.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+    (async function() {
+        await init;
+        build();
+    })();
+
+    async function build() {
+        let data = await window.tos_event;
+        data.stages.sort(compare_end);
+        data.seals.sort(compare_end);
+        if(data) {
+            /* Build Stages Table */
+            let stages = document.createElement("table");
+            stages.classList.add("table");
+
+            let stages_header = document.createElement("tr");
+            ["關卡", "開放時間", "關閉時間"].forEach((item, i) => {
+                let th = document.createElement("th");
+                th.innerHTML = item;
+                stages_header.appendChild(th);
+            });
+            stages.appendChild(stages_header);
+            let cc = 0;
+            data.stages.forEach((item, i) => {
+                if(new Date(item.end) - Date.now() >= 0) {
+                    let row = document.createElement("tr");
+                    if(++cc%2) row.classList.add("table-light");
+                    let stage = document.createElement("td");
+                    let start = document.createElement("td");
+                    let end = document.createElement("td");
+                    if(new Date(item.start) - Date.now() > 0) {
+                        start.classList.add("text-muted");
+                        end.classList.add("text-muted");
+                    }
+                    else if(new Date(item.end) - Date.now() <= 3*60*60*1000) {
+                        start.classList.add("text-danger");
+                        end.classList.add("text-danger");
+                    }
+                    else if(new Date(item.end) - Date.now() <= 24*60*60*1000) {
+                        start.classList.add("text-warning");
+                        end.classList.add("text-warning");
+                    }
+                    else if(item.end && new Date("2050") > new Date(item.end)) {
+                        start.classList.add("text-success");
+                        end.classList.add("text-success");
+                    }
+
+                    stage.innerHTML = `<small class="text-muted">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
+                    stage.addEventListener("click", function() {
+                        let new_win = window.open("url", "_blank");
+                        new_win.location = "https://tos.fandom.com/zh/wiki/" + item.stage;
+                    });
+                    start.innerHTML = moment(item.start).format("MoDo <br>A hh:mm");
+                    end.innerHTML = (new Date("2050") > new Date(item.end)) ? moment(item.end).format("MoDo <br>A hh:mm") : "永久開放";
+
+                    row.appendChild(stage);
+                    row.appendChild(start);
+                    row.appendChild(end);
+                    stages.appendChild(row);
+
+                    let calculate_start = function() {
+                        return (new Date(item.start) - Date.now() > 0) ?
+                        `尚餘 ${moment.duration(new Date(item.start) - Date.now()).humanize()}開放` :
+                        `現已開放 ${moment.duration(new Date(item.start) - Date.now()).humanize()}`;
+                    };
+                    let calculate_end = function() {
+                        return (new Date("2050") > new Date(item.end)) ?
+                        `尚餘 ${moment.duration(new Date(item.end) - Date.now()).humanize()}關閉` :
+                        "永久開放";
+                    };
+                    tippy(start, {
+                        onShow: function(ins) { ins.setContent(calculate_start()); }
+                    });
+                    tippy(end, {
+                        onShow: function(ins) { ins.setContent(calculate_end()); }
+                    });
+                }
+            });
+            document.getElementById("stages").appendChild(stages);
+
+            /* Build Seals Table */
+            let seals = document.createElement("table");
+            seals.classList.add("table");
+
+            let seals_header = document.createElement("tr");
+            ["卡池", "開放時間", "關閉時間"].forEach((item, i) => {
+                let th = document.createElement("th");
+                th.innerHTML = item;
+                seals_header.appendChild(th);
+            });
+            seals.appendChild(seals_header);
+            data.seals.forEach((item, i) => {
+                if(!item.end || new Date(item.end) - Date.now() >= 0) {
+                    let rate_up = item.detail.rate_up ? (new Date(item.detail.rate_up.start) - Date.now() <= 0 && new Date(item.detail.rate_up.end) - Date.now() >= 0) : 0;
+                    let row = document.createElement("tr");
+                    if(!(i%2)) row.classList.add("table-light");
+                    let name = document.createElement("td");
+                    if(rate_up) {
+                        name.classList.add("text-success");
+                    }
+                    let start = document.createElement("td");
+                    let end = document.createElement("td");
+                    if(new Date(item.start) - Date.now() > 0) {
+                        start.classList.add("text-muted");
+                        end.classList.add("text-muted");
+                    }
+                    else if(item.end && new Date(item.end) - Date.now() <= 3*60*60*1000) {
+                        start.classList.add("text-danger");
+                        end.classList.add("text-danger");
+                    }
+                    else if(item.end && new Date(item.end) - Date.now() <= 24*60*60*1000) {
+                        start.classList.add("text-warning");
+                        end.classList.add("text-warning");
+                    }
+
+                    name.innerHTML = `<small class="text-muted">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.name}`;
+                    start.innerHTML = moment(item.start).format("MoDo <br>A hh:mm");
+                    end.innerHTML = item.end ? moment(item.end).format("MoDo <br>A hh:mm") : "永久開放";
+
+                    row.appendChild(name);
+                    row.appendChild(start);
+                    row.appendChild(end);
+                    seals.appendChild(row);
+
+                    let async_cont;
+                    if(item.type == "獨立封印卡活動") {
+                        async_cont = function(ins) {
+                            let cards = [];
+                            cards.push(item.detail["1%"][0]);
+                            for(let j = 0; j < item.detail["4.5%"].length; j++) cards.push(item.detail["4.5%"][j]);
+                            for(let j = 0; j < item.detail["18%"].length; j++) cards.push(item.detail["18%"][j]);
+                            api.card.get(cards)
+                            .then(data => {
+                                let cont = "";
+                                cont += `${rate_up?`<b class="text-warning">`:""}機率加倍：${moment(item.detail.rate_up.start).format("MoDo")} ~ ${moment(new Date(item.detail.rate_up.end) - 1).format("MoDo")}${rate_up?`</b>`:""}<br><br>`;
+                                cont += `<b>大獎：</b><br>
+                                <a class="text-white" href="./card?id=${item.detail["1%"][0]}">${data[item.detail["1%"][0]].name}</a><br>`;
+                                cont += `<b>二獎：</b><br>
+                                <a class="text-white" href="./card?id=${item.detail["4.5%"][0]}">${data[item.detail["4.5%"][0]].name}</a><br>
+                                <a class="text-white" href="./card?id=${item.detail["4.5%"][1]}">${data[item.detail["4.5%"][1]].name}</a><br>`;
+                                cont += `<b>小獎：</b><br>
+                                <a class="text-white" href="./card?id=${item.detail["18%"][0]}">${data[item.detail["18%"][0]].name}</a><br>
+                                <a class="text-white" href="./card?id=${item.detail["18%"][1]}">${data[item.detail["18%"][1]].name}</a><br>
+                                <a class="text-white" href="./card?id=${item.detail["18%"][2]}">${data[item.detail["18%"][2]].name}</a><br>
+                                <a class="text-white" href="./card?id=${item.detail["18%"][3]}">${data[item.detail["18%"][3]].name}</a><br>
+                                <a class="text-white" href="./card?id=${item.detail["18%"][4]}">${data[item.detail["18%"][4]].name}</a>`;
+                                ins.setContent(cont);
+                            });
+                        }
+                    }
+                    else if(item.type == "黑金封印卡活動") {
+                        async_cont = function(ins) {
+                            if(item.detail.first_prize) {
+                                api.card.get(item.detail.first_prize)
+                                .then(data => {
+                                    let cont = `<b>大獎：</b><br><a class="text-white" href="./card?id=${data[item.detail.first_prize].id}">${data[item.detail.first_prize].name}</a><br>`;
+                                    ins.setContent(cont);
+                                });
+                            }
+                            else {
+                                ins.setContent("黑金封印卡活動");
+                            }
+                        };
+                    }
+                    else if(item.type == "封印卡活動") {
+                        async_cont = function(ins) {
+                            if(item.detail.special) {
+                                api.card.get(item.detail.special)
+                                .then(data => {
+                                    let cont = `<b>機率提升(+4.5%)：</b><br><a class="text-white" href="./card?id=${data[item.detail.special].id}">${data[item.detail.special].name}</a><br>`;
+                                    ins.setContent(cont);
+                                });
+                            }
+                            else {
+                                ins.setContent("一般封印卡活動");
+                            }
+                        };
+                    }
+                    tippy(name, {
+                        content: "載入中",
+                        allowHTML: true,
+                        interactive: true,
+                        onShow: async_cont
+                    });
+                    tippy(start, {
+                        onShow: function(ins) { ins.setContent((new Date(item.start) - Date.now() > 0) ? `尚餘 ${moment.duration(new Date(item.start) - Date.now()).humanize()}開放` : `現已開放 ${moment.duration(new Date(item.start) - Date.now()).humanize()}`); }
+                    });
+                    tippy(end, {
+                        onShow: function(ins) { ins.setContent(item.end ? `尚餘 ${moment.duration(new Date(item.end) - Date.now()).humanize()}關閉` : "永久開放"); }
+                    });
+                }
+            });
+            document.getElementById("seals").appendChild(seals);
+        }
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("contents").style.display = "block";
+    }
+
+    function compare_end(a, b) {
+        if(a.end && b.end) return new Date(a.end) - new Date(b.end);
+        if(a.end) return -1;
+        if(b.end) return 1;
+        return 0;
+    }
+    </script>
+    <style>
+    @keyframes loading {
+        0% { transform: translate(-50%,-50%) rotate(0deg); }
+        100% { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+    .loading-container {
+        width: 50px;
+        height: 50px;
+        display: inline-block;
+        overflow: hidden;
+        background: none;
+        margin: 0 20px;
+    }
+    .loading-spinner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform: translateZ(0) scale(1);
+        backface-visibility: hidden;
+        transform-origin: 0 0;
+    }
+    .loading-spinner div {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 5px solid #1adcb6;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: loading 0.33s linear infinite;
+        top: 25px;
+        left: 25px;
+        box-sizing: content-box;
+    }
+    </style>
+</body>
+</html>

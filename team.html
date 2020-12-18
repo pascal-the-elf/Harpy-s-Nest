@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>神魔之塔 組隊預覽</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/flatly/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/pascal-the-elf/TOS-API@latest/API/js/tos_api.min.js"></script>
+    <script>
+    var init = (async function(){
+        window.api = new tos_api();
+        await window.api.init();
+
+        window.params = {};
+        let s = (new URL(location)).searchParams;
+        for (let [k, v] of s) window.params[k] = v;
+        params["id"] = params["id"] ? params["id"] : "1";
+        try { params["id"] = params["id"].split(",").splice(0,6); }
+        catch(e) { params["id"] = [1,0,0,0,0,0]; }
+        while(params["id"].length < 6) params["id"].push(0);
+        window.cards = window.api.card.get(params["id"]);
+    })();
+    </script>
+</head>
+<body>
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="./">神魔之塔 組隊預覽</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbar1">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./">現時活動</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./gallery">卡片圖鑑</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./card">卡片檢視</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./team">組隊預覽</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <br>
+        <div id="loading">
+            <div class="loading-container"><div class="loading-spinner">
+                <div></div>
+            </div></div>
+        </div>
+        <div id="contents" class="container" style="display: none; max-width: 600px;">
+            <div style="float: right;">
+                <a id="share_team" href="javascript:share_team()" style="font-size: 1.1rem;">分享隊伍</a>
+            </div>
+            <div id="imgs" class="card" style="width:100%; display: flex;flex-direction: row; justify-content: space-around; align-items: center;">
+                <div class="card_img card"></div>
+                <div class="card_img card"></div>
+                <div class="card_img card"></div>
+                <div class="card_img card"></div>
+                <div class="card_img card"></div>
+                <div class="card_img card"></div>
+            </div>
+            <div id="stats">
+                <table class="table">
+                    <tr><td style="color: #18bc9c;"><span id="hp"></span></td><td style="color: #18bc9c;"><span id="rec"></span></td></tr>
+                    <tr><td style="color: #3498db;" colspan="2"><span id="atk0"></span></td></tr>
+                    <tr><td style="color: #e74c3c;" colspan="2"><span id="atk1"></span></td></tr>
+                    <tr><td style="color: #18bc5b;" colspan="2"><span id="atk2"></span></td></tr>
+                    <tr><td style="color: #f5c94a;" colspan="2"><span id="atk3"></span></td></tr>
+                    <tr><td style="color: #810bff;" colspan="2"><span id="atk4"></span></td></tr>
+                </table>
+            </div>
+            <div id="leaders"></div>
+            <div id="team_skill"></div>
+        </div>
+        <div id="card_selector" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,.6);">
+            <iframe id="card_selector_page" frameBorder="0" style="height: 90%; width: min(600px, 90%); border-radius: 5px;"></iframe>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/locale/zh-tw.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+    <script>
+    (async function() {
+        await init;
+        document.getElementById("card_selector").addEventListener("click", function(e) {
+            if(e.target == this) this.style.display = "none";
+        });
+        build();
+    })();
+
+    async function build() {
+        window.data = await window.cards;
+        if(data) {
+            let hp = 0, attacks = [0,0,0,0,0], recovery = 0;
+            params["id"].forEach((item, i) => {
+                item = data[item];
+                if(item) {
+                    let img = document.createElement("img");
+                    img.style.width = "100%";
+                    img.src = `https://web-assets.tosconfig.com/gallery/icons/${item.id.toString().padStart(4, "0")}.jpg`;
+                    let img_tip = `<b><a class="text-white" href="card?id=${item.id}" target="_blank">${item.name}</a></b><br><br>`;
+                    img_tip += `生/攻/回：${item.stats_max.hp}/${item.stats_max.attack}/${item.stats_max.recovery}<br>`;
+                    if(item.skills.active && item.skills.active.length) {
+                        img_tip += `主動技能：<br>`;
+                        item.skills.active.forEach((item, i) => {
+                            img_tip += `<b>${item.name}</b> <b style="color: orange; float: right;">${item.cd?"CD":"EP"} ${item.cd?item.cd.min:item.ep.min} / sLv ${item.cd?(item.cd.max-item.cd.min+1):(item.ep.max-item.ep.min+1)}</b><br>${item.effect.replace(/\n/g, " &nbsp; ")}<br><br>`;
+                        });
+                    }
+                    document.getElementsByClassName("card_img")[i].appendChild(img);
+                    tippy(document.getElementsByClassName("card_img")[i], {
+                        allowHTML: true,
+                        interactive: true,
+                        content: img_tip,
+                        maxWidth: 400
+                    });
+                    hp += item.stats_max.hp;
+                    recovery += item.stats_max.recovery;
+                    if(item.attribute == "水") attacks[0] += item.stats_max.attack;
+                    if(item.attribute == "火") attacks[1] += item.stats_max.attack;
+                    if(item.attribute == "木") attacks[2] += item.stats_max.attack;
+                    if(item.attribute == "光") attacks[3] += item.stats_max.attack;
+                    if(item.attribute == "暗") attacks[4] += item.stats_max.attack;
+                    if(i == 0 || i == 5) {
+                        let defc = !!i;
+                        let title = document.createElement("h4"), leader_skl = document.createElement("div");
+                        title.innerHTML = defc ? "戰友技能" : "隊長技能";
+                        let nav = document.createElement("ul"), content = document.createElement("div");
+                        nav.classList.add("nav", "nav-tabs");
+                        content.classList.add("tab-content");
+                        leader_skl.appendChild(nav);
+                        leader_skl.appendChild(content);
+                        item.skills.leader.forEach((item, i) => {
+                            let tab = document.createElement("li"), link = document.createElement("a");
+                            tab.classList.add("nav-item");
+                            link.classList.add("nav-link");
+                            if(!i) link.classList.add("active");
+                            link.dataset.toggle = "tab";
+                            link.href = defc ? "#helper_skill" : "#leader_skill";
+                            link.style.padding = "0.5rem 1rem";
+                            link.innerHTML = item.name;
+                            tab.appendChild(link);
+                            nav.appendChild(tab);
+
+                            let block = document.createElement("div");
+                            block.classList.add("tab-pane", "fade");
+                            if(!i) block.classList.add("active", "show");
+                            block.id = defc ? "helper_skill" : "leader_skill";
+                            block.innerHTML += item.effect.replace(/\n/g, "<br>");
+                            content.appendChild(block);
+                        });
+                        document.getElementById("leaders").appendChild(title);
+                        document.getElementById("leaders").appendChild(leader_skl);
+                    }
+                    if(i == 0) {
+                        let skills = item.skills.team;
+                        let title = document.createElement("h4"), content = document.createElement("div");
+                        title.innerHTML = "隊伍技能";
+                        content.classList.add("card", "card-body");
+                        document.getElementById("team_skill").appendChild(title);
+                        document.getElementById("team_skill").appendChild(content);
+                        skills.forEach((item, i) => {
+                            let block = document.createElement("div");
+                            block.innerHTML = `<b>技能效果：</b><br>${item.effect.replace(/\n/g, "<br>")}<br><b>發動條件：</b><br>${item.condition?item.condition.replace(/\n/g, "<br>"):"無"}<br><br>`;
+                            content.appendChild(block);
+                        });
+                    }
+                }
+                else {
+                    let img = document.createElement("img");
+                    img.style.width = "100%";
+                    img.src = `https://dummyimage.com/150/ffffff/000000.jpg&text=+`;
+                    let img_tip = `<b>沒有卡片</b><br>`;
+                    document.getElementsByClassName("card_img")[i].appendChild(img);
+                    tippy(document.getElementsByClassName("card_img")[i], {
+                        allowHTML: true,
+                        interactive: true,
+                        content: img_tip,
+                        maxWidth: 400
+                    });
+                }
+                let edit_tag = document.createElement("a");
+                edit_tag.innerHTML = "編輯";
+                edit_tag.href = `javascript:edit(${i})`;
+                edit_tag.classList.add("edit_tag");
+                document.getElementsByClassName("card_img")[i].appendChild(edit_tag);
+            });
+            document.getElementById("hp").innerHTML = "隊伍血量：" + hp;
+            document.getElementById("atk0").innerHTML = "水屬性攻擊力：" + attacks[0];
+            document.getElementById("atk1").innerHTML = "火屬性攻擊力：" + attacks[1];
+            document.getElementById("atk2").innerHTML = "木屬性攻擊力：" + attacks[2];
+            document.getElementById("atk3").innerHTML = "光屬性攻擊力：" + attacks[3];
+            document.getElementById("atk4").innerHTML = "暗屬性攻擊力：" + attacks[4];
+            document.getElementById("rec").innerHTML = "隊伍回復力：" + recovery;
+        }
+
+        new ClipboardJS("#share_team", {
+            text: function(tgr) {
+                return `神魔之塔 組隊預覽 - ${params["id"].filter(x=>!!x).map(x=>{return data[x].name}).join(" | ")}\n\n` + encodeURI(`https://share.pascaltheelf.workers.dev/?title=神魔之塔 組隊預覽 - ${params["id"].filter(x=>!!x).map(x=>{return data[x].name}).join(" | ")}&url=${location.href}`);
+            }
+        });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("contents").style.display = "block";
+    }
+
+    function edit(pos=0) {
+        let session = Date.now().toString();
+        document.getElementById("card_selector").style.display = "flex";
+        document.getElementById("card_selector_page").src = "./gallery.html?nav=none&selector=true&autochecked=disabled&session="+session;
+        window.addEventListener("message", function(e) {
+            let data = e.data;
+            if(data.session == session) {
+                params["id"][pos] = data.card.toString();
+                if(pos == 0) params["id"][5] = data.card.toString();
+                let url = new URL(document.location);
+                url.searchParams.set("id", params["id"].join(","));
+                location.href = url.toString();
+            }
+            document.getElementById("card_selector").style.display = "none";
+        }, {once: true});
+    }
+    async function share_team() {
+        try {
+            let cards = await window.cards;
+            await navigator.share({
+                title: "分享隊伍",
+                text: `神魔之塔 組隊預覽 - ${params["id"].filter(x=>!!x).map(x=>{return cards[x].name}).join(" ")}`,
+                url: `https://share.pascaltheelf.workers.dev/?title=神魔之塔 組隊預覽 - ${params["id"].filter(x=>!!x).map(x=>{return cards[x].name}).join(" | ")}&url=${location.href}`,
+            })
+            Swal.fire({
+                icon: "success",
+                title: "已分享",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        } catch(err) {
+            Swal.fire({
+                icon: "success",
+                title: "已複製到剪貼簿",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    }
+    </script>
+    <style>
+    @keyframes loading {
+        0% { transform: translate(-50%,-50%) rotate(0deg); }
+        100% { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+    .loading-container {
+        width: 50px;
+        height: 50px;
+        display: inline-block;
+        overflow: hidden;
+        background: none;
+        margin: 0 20px;
+    }
+    .loading-spinner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform: translateZ(0) scale(1);
+        backface-visibility: hidden;
+        transform-origin: 0 0;
+    }
+    .loading-spinner div {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 5px solid #1adcb6;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: loading 0.33s linear infinite;
+        top: 25px;
+        left: 25px;
+        box-sizing: content-box;
+    }
+    .card_img {
+        width: 15%;
+        margin: 4px;
+        border-radius: 6.8%;
+    }
+    .card_img > img {
+        border-radius: 5.5%;
+    }
+    .card_img:hover > .edit_tag {
+        display: inline;
+    }
+    .edit_tag {
+        display: none;
+        position: absolute;
+        right: 1px;
+        color: white;
+        background-color: rgba(0,0,0,.7);
+        padding: 1px 2px;
+        font-size: 0.7rem;
+        border-radius: 0 3px 0 2px;
+    }
+    .edit_tag:hover {
+        color: white;
+    }
+    #leader_skill, #helper_skill, #team_skill {
+        margin: 0 0 12px 0;
+    }
+    </style>
+</body>
+</html>

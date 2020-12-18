@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>神魔之塔 卡片檢視</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/flatly/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/pascal-the-elf/TOS-API@latest/API/js/tos_api.min.js"></script>
+    <script>
+    var init = (async function(){
+        window.api = new tos_api();
+        await window.api.init();
+
+        window.params = {};
+        let s = (new URL(location)).searchParams;
+        for (let [k, v] of s) window.params[k] = v;
+        params["id"] = params["id"] ? Number(params["id"]) : 1;
+        window.card = window.api.card.get(params["id"]);
+    })();
+    </script>
+</head>
+<body>
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="./">神魔之塔 卡片檢視</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#head_nav" aria-controls="head_nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="head_nav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./">現時活動</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./gallery">卡片圖鑑</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./card">卡片檢視</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./team">組隊預覽</a>
+                    </li>
+                </ul>
+                <div class="form-inline my-2 my-lg-0">
+                    <input id="search_id" class="form-control mr-sm-2" type="number" placeholder="卡片 ID" style="max-width: 120px;">
+                    <button class="btn btn-primary my-2 my-sm-0" onclick="location.href='?id='+document.getElementById('search_id').value">查詢</button>
+                </div>
+            </div>
+        </nav>
+        <br>
+        <div id="loading">
+            <div class="loading-container"><div class="loading-spinner">
+                <div></div>
+            </div></div>
+        </div>
+        <div id="contents" class="container" style="display: none; max-width: 600px;">
+            <div id="head" style="height: 120px; font-size: 1.05rem;">
+                <div style="width: 100px; height: 100px; float: left; margin: 0px 10px 10px 0px;"><a id="img_toggle" data-toggle="collapse" data-target="#full_img_block"><img class="card_thumbnail rounded float-left"></img></a></div>
+                <span class="card_series text-muted"></span>
+                <h1 class="card_name" style="font-size: 1.55rem; margin-bottom: 0; white-space: nowrap; overflow: auto;"></h1>
+                <span class="card_attribute"></span>屬性<span class="card_race"></span><br>
+                <span class="card_rarity"></span><br>
+            </div>
+            <div class="collapse" id="full_img_block">
+                <div class="card card-body">
+                    <img id="full_img" style="width: 100%;" data-tippy-content="圖片是從<a href='https://gallery.tosgame.com/' target='_blank'>神魔官方圖鑑</a>找來的"></img>
+                </div>
+            </div>
+            <div id="statistics" style="height: 60px; font-size: 1.05rem;">
+                <b>編號</b> <span class="card_id"></span><br>
+                <b>空間</b> <span class="card_space"></span><br>
+            </div>
+            <div id="stats" style="min-height: 240px; margin: 0.3rem 0 1.7rem 0;">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#level_max_stats" style="padding: 0.5rem 1rem;">滿等數值</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#level_1_stats" style="padding: 0.5rem 1rem;">初等數值</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#custom_level_stats" style="padding: 0.5rem 1rem;">其他等級數值</a>
+                    </li>
+                </ul>
+                <div id="stats_blocks" class="tab-content">
+                    <div class="tab-pane fade active show" id="level_max_stats">
+                        <table class="table" style="margin: 0;">
+                            <tr><th>生命力</th><td></td></tr>
+                            <tr><th>攻擊力</th><td></td></tr>
+                            <tr><th>回復力</th><td></td></tr>
+                            <tr><th>總計</th><td></td></tr>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="level_1_stats">
+                        <table class="table" style="margin: 0;">
+                            <tr><th>生命力</th><td></td></tr>
+                            <tr><th>攻擊力</th><td></td></tr>
+                            <tr><th>回復力</th><td></td></tr>
+                            <tr><th>總計</th><td></td></tr>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="custom_level_stats">
+                        <table class="table" style="margin: 0;">
+                            <tr>
+                                <th><label id="custom_level">等級</label></th>
+                                <th><input id="custom_level_input" type="range" class="custom-range" value="1" min="1" step="1" oninput="change_level_stats()"></th>
+                            </tr>
+                        </table>
+                        <table class="table" style="margin: 0;">
+                            <tr><th>生命力</th><td></td></tr>
+                            <tr><th>攻擊力</th><td></td></tr>
+                            <tr><th>回復力</th><td></td></tr>
+                            <tr><th>總計</th><td></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="active" style="min-height: 60px; font-size: 1rem; display: none; margin: 0.3rem 0 1.7rem 0;">
+                <h3 style="font-size: 1.3rem;" data-toggle="collapse" href="#card_active" data-tippy-content="收起/展開">主動技能</h3>
+                <div id="card_active" class="collapse show"></div>
+            </div>
+            <div id="leader" style="min-height: 60px; font-size: 1rem; display: none; margin: 0.3rem 0 1.7rem 0;">
+                <h3 style="font-size: 1.3rem;" data-toggle="collapse" href="#card_leader" data-tippy-content="收起/展開">隊長技能</h3>
+                <div id="card_leader" class="collapse show"></div>
+            </div>
+            <div id="team_skl" style="min-height: 60px; font-size: 1rem; display: none; margin: 0.3rem 0 1.7rem 0;">
+                <h3 style="font-size: 1.3rem;" data-toggle="collapse" href="#card_team_skl" data-tippy-content="收起/展開">隊伍技能</h3>
+                <div id="card_team_skl" class="collapse show"></div>
+            </div>
+            <div id="amelioration" style="min-height: 60px; font-size: 1rem; display: none; margin: 0.3rem 0 1.7rem 0;">
+                <h3 style="font-size: 1.3rem;" data-toggle="collapse" href="#card_amelioration" data-tippy-content="收起/展開">昇華能力</h3>
+                <div id="card_amelioration" class="collapse show"></div>
+            </div>
+            <div id="story" style="min-height: 60px; font-size: 1rem; display: none; margin: 0.3rem 0 1.7rem 0;">
+                <h3 style="font-size: 1.3rem;" data-toggle="collapse" href="#card_story" data-tippy-content="收起/展開">卡片故事</h3>
+                <p id="card_story" class="card_story collapse show"></p>
+            </div>
+            <div id="info" style="min-height: 60px; font-size: 1rem; display: none; margin: 0.3rem 0 1.7rem 0;">
+                <h3 style="font-size: 1.3rem;" data-toggle="collapse" href="#card_info" data-tippy-content="收起/展開">卡片資訊</h3>
+                <p id="card_info" class="card_info collapse show"></p>
+            </div>
+            <div id="end_pad" style="height: 60px;"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/locale/zh-tw.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+    <script>
+    (async function() {
+        await init;
+        build();
+    })();
+
+    async function build() {
+        let data = await window.card;
+
+        if(data && data[params["id"]]) {
+            Array.from(document.getElementsByClassName("card_name")).forEach((item, i) => {
+                item.innerHTML = data[params["id"]].name;
+            });
+            Array.from(document.getElementsByClassName("card_series")).forEach((item, i) => {
+                item.innerHTML = data[params["id"]].series;
+            });
+            Array.from(document.getElementsByClassName("card_rarity")).forEach((item, i) => {
+                item.innerHTML = "✦".repeat(data[params["id"]].rarity);
+            });
+            Array.from(document.getElementsByClassName("card_attribute")).forEach((item, i) => {
+                item.innerHTML = data[params["id"]].attribute;
+            });
+            Array.from(document.getElementsByClassName("card_race")).forEach((item, i) => {
+                item.innerHTML = data[params["id"]].race;
+            });
+            Array.from(document.getElementsByClassName("card_id")).forEach((item, i) => {
+                item.innerHTML = data[params["id"]].id;
+            });
+            Array.from(document.getElementsByClassName("card_space")).forEach((item, i) => {
+                item.innerHTML = data[params["id"]].cost;
+            });
+            document.getElementById("full_img").src = `https://web-assets.tosconfig.com/gallery/cards/${data[params["id"]].id.toString().padStart(4, "0")}.jpg`;
+            if(data[params["id"]].story) {
+                document.getElementById("story").style.display = "block";
+                Array.from(document.getElementsByClassName("card_story")).forEach((item, i) => {
+                    item.innerHTML = data[params["id"]].story.replace(/\n/g, "<br>");
+                });
+            }
+            if(data[params["id"]].info) {
+                document.getElementById("info").style.display = "block";
+                Array.from(document.getElementsByClassName("card_info")).forEach((item, i) => {
+                    item.innerHTML = data[params["id"]].info.replace(/\n/g, "<br>");
+                });
+            }
+            if(data[params["id"]].skills.active && data[params["id"]].skills.active.length > 0) {
+                let act = data[params["id"]].skills.active;
+                document.getElementById("active").style.display = "block";
+                let nav = document.createElement("ul"), content = document.createElement("div");
+                nav.classList.add("nav", "nav-tabs");
+                content.classList.add("tab-content");
+                document.getElementById("card_active").appendChild(nav);
+                document.getElementById("card_active").appendChild(content);
+                act.forEach((item, i) => {
+                    let tab = document.createElement("li"), link = document.createElement("a");
+                    tab.classList.add("nav-item");
+                    link.classList.add("nav-link");
+                    if(!i) link.classList.add("active");
+                    link.dataset.toggle = "tab";
+                    link.href = "#active_skill_" + i;
+                    link.style.padding = "0.5rem 1rem";
+                    link.innerHTML = item.name;
+                    tab.appendChild(link);
+                    nav.appendChild(tab);
+
+                    let block = document.createElement("div"), info = document.createElement("table"),
+                    tr1 = document.createElement("tr"), cd = document.createElement("th"), lvl = document.createElement("th"),
+                    tr2 = document.createElement("tr"), effect = document.createElement("td");
+                    block.classList.add("tab-pane", "fade");
+                    if(!i) block.classList.add("active", "show");
+                    block.id = "active_skill_" + i;
+                    info.classList.add("table");
+                    try{ cd.innerHTML = `最小 ${item.cd?"CD":"EP"}：${item.cd?item.cd.min:item.ep.min}`; }catch(e){}
+                    try{ lvl.innerHTML = `最高技能等級：${item.cd?(item.cd.max-item.cd.min+1):(item.ep.max-item.ep.min+1)}`; }catch(e){}
+                    effect.colSpan = "2";
+                    effect.innerHTML += item.effect.replace(/\n/g, "<br>");
+                    tr1.appendChild(cd);
+                    tr1.appendChild(lvl);
+                    tr2.appendChild(effect);
+                    info.appendChild(tr1);
+                    info.appendChild(tr2);
+                    block.appendChild(info);
+                    content.appendChild(block);
+                });
+            }
+            if(data[params["id"]].skills.leader && data[params["id"]].skills.leader.length > 0) {
+                let skill = data[params["id"]].skills.leader;
+                document.getElementById("leader").style.display = "block";
+                let nav = document.createElement("ul"), content = document.createElement("div");
+                nav.classList.add("nav", "nav-tabs");
+                content.classList.add("tab-content");
+                document.getElementById("card_leader").appendChild(nav);
+                document.getElementById("card_leader").appendChild(content);
+                skill.forEach((item, i) => {
+                    let tab = document.createElement("li"), link = document.createElement("a");
+                    tab.classList.add("nav-item");
+                    link.classList.add("nav-link");
+                    if(!i) link.classList.add("active");
+                    link.dataset.toggle = "tab";
+                    link.href = "#leader_skill_" + i;
+                    link.style.padding = "0.5rem 1rem";
+                    link.innerHTML = item.name;
+                    tab.appendChild(link);
+                    nav.appendChild(tab);
+
+                    let block = document.createElement("div");
+                    block.classList.add("tab-pane", "fade");
+                    if(!i) block.classList.add("active", "show");
+                    block.id = "leader_skill_" + i;
+                    block.innerHTML += item.effect.replace(/\n/g, "<br>");
+                    content.appendChild(block);
+                });
+            }
+            if(data[params["id"]].skills.team && data[params["id"]].skills.team.length > 0) {
+                let skills = data[params["id"]].skills.team;
+                document.getElementById("team_skl").style.display = "block";
+                let content = document.createElement("div");
+                content.classList.add("card", "card-body");
+                document.getElementById("card_team_skl").appendChild(content);
+                skills.forEach((item, i) => {
+                    let block = document.createElement("div");
+                    block.innerHTML = `<b>技能效果：</b><br>${item.effect.replace(/\n/g, "<br>")}<br><b>發動條件：</b><br>${item.condition?item.condition.replace(/\n/g, "<br>"):"無"}<br><br>`;
+                    content.appendChild(block);
+                });
+            }
+            if(data[params["id"]].amelioration && data[params["id"]].amelioration.length > 0) {
+                let amel = data[params["id"]].amelioration;
+                document.getElementById("amelioration").style.display = "block";
+                let content = document.createElement("table");
+                content.classList.add("table");
+                document.getElementById("card_amelioration").appendChild(content);
+                let header = document.createElement("tr"), th1 = document.createElement("th"), th2 = document.createElement("th");
+                th1.innerHTML = "昇華效果";
+                th2.innerHTML = "所需靈魂";
+                th2.style.minWidth = "100px";
+                header.appendChild(th1);
+                header.appendChild(th2);
+                content.appendChild(header);
+                amel.forEach((item, i) => {
+                    let row = document.createElement("tr"), effect = document.createElement("td"), cost = document.createElement("td");
+                    effect.innerHTML = item.effect.replace(/\n/g, "<br>");
+                    cost.innerHTML = item.cost;
+                    row.appendChild(effect);
+                    row.appendChild(cost);
+                    content.appendChild(row);
+                });
+            }
+            Array.from(document.getElementsByClassName("card_thumbnail")).forEach((item, i) => {
+                //item.src = data[params["id"]].image;
+                item.src = `https://web-assets.tosconfig.com/gallery/icons/${data[params["id"]].id.toString().padStart(4, "0")}.jpg`;
+                item.style.width = "100%";
+            });
+            let stats_max = Object.values(data[params["id"]].stats_max);
+            stats_max.push(stats_max[0]+stats_max[1]+stats_max[2]);
+            Array.from(document.getElementById("level_max_stats").getElementsByTagName("td")).forEach((item, i) => {
+                item.innerHTML = stats_max[i];
+            });
+            let stats = Object.values(data[params["id"]].stats);
+            stats.push(stats[0]+stats[1]+stats[2]);
+            Array.from(document.getElementById("level_1_stats").getElementsByTagName("td")).forEach((item, i) => {
+                item.innerHTML = stats[i];
+            });
+            document.getElementById("custom_level_input").max = data[params["id"]].table.length - 1;
+            change_level_stats();
+        }
+        else {
+            location.href = "?id=1";
+        }
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("contents").style.display = "block";
+        tippy("[data-tippy-content]", {
+            allowHTML: true,
+            interactive: true
+        });
+    }
+
+    function compare_end(a, b) {
+        if(a.end && b.end) return new Date(a.end) - new Date(b.end);
+        if(a.end) return -1;
+        if(b.end) return 1;
+        return 0;
+    }
+    async function change_level_stats() {
+        let data = await window.card;
+        let level = document.getElementById("custom_level_input").value;
+        document.getElementById("custom_level").innerHTML = "等級 "+level;
+        let stats = Object.values(data[params["id"]].table[level]).splice(0, 3);
+        stats.push(stats[0]+stats[1]+stats[2]);
+        Array.from(document.getElementById("custom_level_stats").getElementsByTagName("td")).forEach((item, i) => {
+            item.innerHTML = stats[i];
+        });
+    }
+    </script>
+    <style>
+    @keyframes loading {
+        0% { transform: translate(-50%,-50%) rotate(0deg); }
+        100% { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+    .loading-container {
+        width: 50px;
+        height: 50px;
+        display: inline-block;
+        overflow: hidden;
+        background: none;
+        margin: 0 20px;
+    }
+    .loading-spinner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform: translateZ(0) scale(1);
+        backface-visibility: hidden;
+        transform-origin: 0 0;
+    }
+    .loading-spinner div {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 5px solid #1adcb6;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: loading 0.33s linear infinite;
+        top: 25px;
+        left: 25px;
+        box-sizing: content-box;
+    }
+    </style>
+</body>
+</html>
