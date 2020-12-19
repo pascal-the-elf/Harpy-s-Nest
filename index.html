@@ -25,6 +25,11 @@
         await window.api.init();
         window.tos_event = window.api.event.get();
     })();
+    window.addEventListener("load", () => {
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    });
     </script>
 </head>
 <body>

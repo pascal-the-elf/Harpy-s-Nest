@@ -34,6 +34,11 @@
         if(!params["attr"] && !params["race"] && !params["star"]) sp = {star: "1,2,3,4,5,6,7,8"};
         window.all_cards = window.api.card.search(sp);
     })();
+    window.addEventListener("load", () => {
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    });
     </script>
 </head>
 <body>

@@ -33,6 +33,11 @@
         while(params["id"].length < 6) params["id"].push(0);
         window.cards = window.api.card.get(params["id"]);
     })();
+    window.addEventListener("load", () => {
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    });
     </script>
 </head>
 <body>

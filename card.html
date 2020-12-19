@@ -30,6 +30,11 @@
         params["id"] = params["id"] ? Number(params["id"]) : 1;
         window.card = window.api.card.get(params["id"]);
     })();
+    window.addEventListener("load", () => {
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    });
     </script>
 </head>
 <body>
