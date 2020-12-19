@@ -219,7 +219,8 @@
 
                     let block = document.createElement("div"), info = document.createElement("table"),
                     tr1 = document.createElement("tr"), cd = document.createElement("th"), lvl = document.createElement("th"),
-                    tr2 = document.createElement("tr"), effect = document.createElement("td");
+                    tr2 = document.createElement("tr"), effect = document.createElement("td"),
+                    tr_switch = document.createElement("tr"), th_switch = document.createElement("th");
                     block.classList.add("tab-pane", "fade");
                     if(!i) block.classList.add("active", "show");
                     block.id = "active_skill_" + i;
@@ -232,6 +233,16 @@
                     tr1.appendChild(lvl);
                     tr2.appendChild(effect);
                     info.appendChild(tr1);
+                    if(item.switch) {
+                        th_switch.colSpan = "2";
+                        (async function(swt, th){
+                            let card = await api.card.get(swt);
+                            let name = card[swt].name;
+                            th.innerHTML = `變身成 <a href="?id=${swt}">${name}</a>`;
+                        })(item.switch, th_switch);
+                        tr_switch.appendChild(th_switch);
+                        info.appendChild(tr_switch);
+                    }
                     info.appendChild(tr2);
                     block.appendChild(info);
                     content.appendChild(block);
