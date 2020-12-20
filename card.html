@@ -64,7 +64,7 @@
                     </li>
                 </ul>
                 <div class="form-inline my-2 my-lg-0">
-                    <input id="search_id" class="form-control mr-sm-2" type="number" placeholder="卡片 ID" style="max-width: 120px;">
+                    <input id="search_id" class="form-control mr-sm-2" type="number" placeholder="卡片 ID" style="max-width: 120px;" onkeyup="if(this.key)">
                     <button class="btn btn-primary my-2 my-sm-0" onclick="location.href='?id='+document.getElementById('search_id').value">查詢</button>
                 </div>
             </div>
@@ -170,18 +170,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/locale/zh-tw.js"></script>
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://unpkg.com/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+    <script src="https://unpkg.com/tippy.js@6.2.7/dist/tippy-bundle.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
     <script>
     (async function() {
         await init;
+        window.data = await window.card;
         build();
+        gen_meta();
     })();
 
     async function build() {
-        let data = await window.card;
-
+        if(data[params["id"]].name) document.title = data[params["id"]].name + " | " +  document.title;
         if(data && data[params["id"]]) {
             Array.from(document.getElementsByClassName("card_name")).forEach((item, i) => {
                 item.innerHTML = data[params["id"]].name;
@@ -366,7 +367,6 @@
         return 0;
     }
     async function change_level_stats() {
-        let data = await window.card;
         let level = document.getElementById("custom_level_input").value;
         document.getElementById("custom_level").innerHTML = "等級 "+level;
         let stats = Object.values(data[params["id"]].table[level]).splice(0, 3);
@@ -374,6 +374,16 @@
         Array.from(document.getElementById("custom_level_stats").getElementsByTagName("td")).forEach((item, i) => {
             item.innerHTML = stats[i];
         });
+    }
+    function gen_meta() {
+        var thumbnail = document.createElement("meta");
+        thumbnail.setAttribute("name", "thumbnail");
+        thumbnail.setAttribute("content", data[params["id"]].image);
+        document.head.appendChild(thumbnail);
+        var description = document.createElement("meta");
+        description.setAttribute("name", "description");
+        description.setAttribute("content", "查看 " + data[params["id"]].name + " 的數據與技能 | 神魔之塔 卡片檢視");
+        document.head.appendChild(description);
     }
     </script>
     <style>
