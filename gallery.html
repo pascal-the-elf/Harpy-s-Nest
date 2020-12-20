@@ -33,7 +33,8 @@
         if(params["attr"]) sp.attr = params["attr"];
         if(params["race"]) sp.race = params["race"];
         if(params["star"]) sp.star = params["star"];
-        if(!params["attr"] && !params["race"] && !params["star"]) sp = {star: "1,2,3,4,5,6,7,8"};
+        if(params["name"]) sp.name = params["name"];
+        if(!params["attr"] && !params["race"] && !params["star"] && !params["name"]) sp = {star: "1,2,3,4,5,6,7,8"};
         window.all_cards = window.api.card.search(sp);
     })();
     window.addEventListener("load", () => {
@@ -171,8 +172,11 @@
                         <label class="custom-control-label" for="filter-star-8">8 </label>
                     </div>
                 </div>
-                <div style="text-align: right;">
-                    <a class="btn btn-primary" href="javascript:search()" role="button">篩選</a>
+                <div>
+                <div style="width: 200px; float: left;"><input id="search_name" class="form-control mr-sm-2" type="text" placeholder="卡片名稱 (beta)" style="max-width: 200px;"></div>
+                    <div style="text-align: right;">
+                        <a class="btn btn-primary" href="javascript:search()" role="button">篩選</a>
+                    </div>
                 </div>
             </div>
             <div id="wrapper" style="width:100%; display: flex; flex-wrap: wrap; flex-direction: row; justify-content: flex-start; align-items: flex-start;"></div>
@@ -302,6 +306,11 @@
                 } catch(e) {}
             }
         }
+        if(params["name"]) {
+            try {
+                document.getElementById("search_name").value = params["name"];
+            } catch(e) {}
+        }
         if(params["autochecked"] == "disabled") {
             let elms = document.getElementsByClassName("custom-control-input");
             for(let i = 0; i <= elms.length; i++) {
@@ -309,6 +318,7 @@
                     elms[i].checked = false;
                 } catch(e) {}
             }
+            document.getElementById("search_name").value = "";
         }
     }
 
@@ -337,7 +347,12 @@
             } catch(e) {}
         }
 
-        let des = `?attr=${attr.join(",")}&race=${race.join(",")}&star=${star.join(",")}`;
+        let name = [];
+        document.getElementById("search_name").value.replace(/ /g, "").split(",").forEach(s => {
+            try { name.push(s) } catch(e) {}
+        });
+
+        let des = `?attr=${attr.join(",")}&race=${race.join(",")}&star=${star.join(",")}&name=${name.join(",")}`;
         if(params["nav"]) des += `&nav=${params["nav"]}`;
         if(params["session"]) des += `&session=${params["session"]}`;
         if(params["selector"]) des += `&selector=${params["selector"]}`;
