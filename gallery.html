@@ -25,6 +25,13 @@
     var init = (async function(){
         window.api = new tos_api();
         await window.api.init();
+        try {
+            window.config = (localStorage["config"] && JSON.parse(localStorage["config"]).version >= 20201222) ? JSON.parse(localStorage["config"]) : {
+                version: 20201222,
+                auto_reload_events: 60,
+                auto_load_gallery: 100
+            };
+        } catch(e) { console.error("cannot build config", e) }
 
         window.params = {};
         let s = (new URL(location)).searchParams;
@@ -67,7 +74,7 @@
                         <a class="nav-link" href="./team">組隊預覽</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="./settings">設定</a>
+                        <a class="nav-link" href="./settings">更多</a>
                     </li>
                 </ul>
             </div>
@@ -180,7 +187,8 @@
                 </div>
             </div>
             <div id="wrapper" style="width:100%; display: flex; flex-wrap: wrap; flex-direction: row; justify-content: flex-start; align-items: flex-start;"></div>
-            <div id="end_pad" style="height: 200px;"></div>
+            <div id="end_pad" style="height: 500px;"></div>
+            <a style="float: right; display: none;" href="javascript:window.force_add = 1;">載入更多</a>
         </div>
     </div>
 
@@ -193,8 +201,8 @@
     <script src="https://unpkg.com/tippy.js@6.2.7/dist/tippy-bundle.umd.min.js"></script>
     <script>
     (async function() {
-        window.limit = 100;
         await init;
+            window.limit = (config && config.auto_load_gallery >= 0) ? config.auto_load_gallery : 100;
         if(params["nav"] && params["nav"] == "none") document.getElementsByClassName("navbar")[0].style.display = "none";
         filter_check_sync();
         build();
@@ -203,6 +211,7 @@
     async function add() {
         await new Promise((sol, rej) => {
             window.onscroll = function() {
+                console.log("scrolled");
                 if ((window.innerHeight + window.scrollY + 500) >= document.body.offsetHeight) {
                     window.onscroll = function() {};
                     sol();
@@ -211,6 +220,11 @@
                     window.onscroll = function() {};
                     window.limit = 9899;
                     console.log("RELEASE RECOLLECTION!!!!!!!");
+                    sol();
+                }
+                if(window.force_add) {
+                    window.force_add = 0;
+                    window.onscroll = function() {};
                     sol();
                 }
             };

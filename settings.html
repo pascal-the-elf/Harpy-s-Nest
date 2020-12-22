@@ -25,6 +25,13 @@
     var init = (async function(){
         window.api = new tos_api();
         await window.api.init();
+        try {
+            window.config = (localStorage["config"] && JSON.parse(localStorage["config"]).version >= 20201222) ? JSON.parse(localStorage["config"]) : {
+                version: 20201222,
+                auto_reload_events: 60,
+                auto_load_gallery: 100
+            };
+        } catch(e) { console.error("cannot build config", e) }
     })();
     window.addEventListener("load", () => {
         if ("serviceWorker" in navigator) {
@@ -56,7 +63,7 @@
                         <a class="nav-link" href="./team">組隊預覽</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="./settings">設定</a>
+                        <a class="nav-link" href="./settings">更多</a>
                     </li>
                 </ul>
             </div>
@@ -70,7 +77,25 @@
         <div id="contents" class="container" style="display: none;">
             <br>
             <h3>設定</h3>
+            <p id="cache_size">目前快取用量： 計算中...</p>
             <a class="btn btn-primary" href="javascript:clear_cache()">刪除快取</a>
+            <br><br>
+            <h4>自動重新整理活動資訊</h4>
+            <input id="auto_reload_events" class="form-control mr-sm-2" type="number" placeholder="間隔分鐘數（欲關閉請設為 0）" style="max-width: 250px;">
+            <br>
+            <h4>自動載入圖鑑</h4>
+            <input id="auto_load_gallery" class="form-control mr-sm-2" type="number" placeholder="初始載入數（欲關閉請設為 0）" style="max-width: 250px;">
+            <br>
+            <a class="btn btn-primary" href="javascript:save_config()">儲存設定</a>
+            <br><br>
+            <h3>相關資源</h3>
+            <ul id="resources_list">
+                <li><a href="https://github.com/pascal-the-elf/TOS-Informer" target="_blank">本網站 Github 專案</a><br>本網站程式碼及相關資訊等</li>
+                <li><a href="https://github.com/pascal-the-elf/TOS-API" target="_blank">本網站使用的 API 專案</a><br>本網站使用的 API 相關資訊等</li>
+                <li><a href="https://towerofsaviors.com/" target="_blank">神魔之塔 官方網站</a><br>神魔之塔最新資訊及新聞稿等</li>
+                <li><a href="https://gallery.tosgame.com/#/" target="_blank">神魔之塔 官方圖鑑</a><br>神魔之塔卡片版本、系列、圖片等</li>
+                <li><a href="https://tos.fandom.com/zh/wiki/神魔之塔_繁中維基" target="_blank">神魔之塔 繁中維基</a><br>玩家社群建立的卡片及關卡資訊等</li>
+            </ul>
         </div>
     </div>
 
@@ -84,15 +109,36 @@
     <script>
     (async function() {
         await init;
+
+        api.cache.info().then(cache => {
+            document.getElementById("cache_size").innerHTML = "目前快取用量： " + cache.READABLE;
+        });
+        document.getElementById("auto_reload_events").value = (config && config.auto_reload_events >= 0) ? config.auto_reload_events : 60;
+        document.getElementById("auto_load_gallery").value = (config && config.auto_load_gallery >= 0) ? config.auto_load_gallery : 100;
+
         document.getElementById("loading").style.display = "none";
         document.getElementById("contents").style.display = "block";
     })();
 
     function clear_cache() {
         api.cache.clear();
+        document.getElementById("cache_size").innerHTML = "目前快取用量： 重新載入以計算用量";
         Swal.fire({
             icon: "success",
             title: "已刪除快取",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000
+        });
+    }
+    function save_config() {
+        config.auto_reload_events = Number(document.getElementById("auto_reload_events").value);
+        config.auto_load_gallery = Number(document.getElementById("auto_load_gallery").value);
+        localStorage["config"] = JSON.stringify(config);
+        Swal.fire({
+            icon: "success",
+            title: "已儲存",
             toast: true,
             position: "top-end",
             showConfirmButton: false,
@@ -132,6 +178,9 @@
         top: 25px;
         left: 25px;
         box-sizing: content-box;
+    }
+    #resources_list > li {
+        margin: 6px 0;
     }
     </style>
 </body>

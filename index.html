@@ -25,6 +25,13 @@
     var init = (async function(){
         window.api = new tos_api();
         await window.api.init();
+        try {
+            window.config = (localStorage["config"] && JSON.parse(localStorage["config"]).version >= 20201222) ? JSON.parse(localStorage["config"]) : {
+                version: 20201222,
+                auto_reload_events: 60,
+                auto_load_gallery: 100
+            };
+        } catch(e) { console.error("cannot build config", e) }
         window.tos_event = window.api.event.get();
     })();
     window.addEventListener("load", () => {
@@ -57,7 +64,7 @@
                         <a class="nav-link" href="./team">組隊預覽</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="./settings">設定</a>
+                        <a class="nav-link" href="./settings">更多</a>
                     </li>
                 </ul>
             </div>
@@ -280,6 +287,10 @@
         }
         document.getElementById("loading").style.display = "none";
         document.getElementById("contents").style.display = "block";
+
+        if(config && config.auto_reload_events > 0) {
+            setTimeout(()=>{location.reload()}, config.auto_reload_events * 60000);
+        }
     }
 
     function compare_end(a, b) {
