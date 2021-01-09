@@ -77,7 +77,8 @@
         },
         {
             "name": "姵儀",
-            "facebook": "1024PeiYi"
+            "facebook": "1024PeiYi",
+            "p": 747
         },
         {
             "name": "貓兜兜Ｄｏｌｌｙ",
@@ -110,6 +111,30 @@
             "name": "張小壹",
             "facebook": "lilone.tw",
             "p": 177
+        },
+        {
+            "name": "大舊石 Bigoldstone",
+            "facebook": "bigoldstone2016",
+            "p": 50
+        },
+        {
+            "name": "媞妮Teeny",
+            "facebook": "teeny0607",
+            "p": 407
+        },
+        {
+            "name": "WiwiBaby",
+            "facebook": "wiwibaby520",
+            "p": 364
+        },
+        {
+            "name": "林茉晶",
+            "facebook": "LIN.MO.JING",
+            "p": 148
+        },
+        {
+            "name": "Dong東東",
+            "facebook": "dong0604"
         }
     ]
 }
