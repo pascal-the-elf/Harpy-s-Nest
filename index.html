@@ -138,7 +138,7 @@
                         end.classList.add("text-success");
                     }
 
-                    let stage_type_class = [];
+                    let stage_type_class = ["stage-type"];
                     if((item.type || "").includes("地獄級")) stage_type_class.push("rainbow-text");
                     else stage_type_class.push("text-muted");
                     stage.innerHTML = `<small class="${stage_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
@@ -340,6 +340,10 @@
         background: linear-gradient(to right, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+    }
+    .stage-type {
+        white-space: nowrap;
+        overflow: auto;
     }
     </style>
 </body>
