@@ -110,7 +110,7 @@
             ["關卡", "開放時間", "關閉時間"].forEach((item, i) => {
                 let th = document.createElement("th");
                 th.innerHTML = item;
-                if(i > 0) th.style.minWidth = "82px";
+                if(i > 0) th.style.minWidth = "86px";
                 else th.style.maxWidth = "50%";
                 stages_header.appendChild(th);
             });
@@ -349,7 +349,10 @@
         position: relative;
     }
     .stage-type {
+        display: inline-block;
         white-space: nowrap;
+        overflow: auto;
+        max-width: 40vw;
     }
     .stage {
         position: relative;
