@@ -104,7 +104,7 @@
         if(data) {
             /* Build Stages Table */
             let stages = document.createElement("table");
-            stages.classList.add("table");
+            stages.classList.add("table", "stage-table");
 
             let stages_header = document.createElement("tr");
             ["關卡", "開放時間", "關閉時間"].forEach((item, i) => {
@@ -342,10 +342,15 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    .stage-table, .stage-table > thead, .stage-table > tbody, .stage-table > tbody > tr {
+        width: 100%;
+        position: relative;
+    }
     .stage-type {
         white-space: nowrap;
         overflow: auto;
     }
+    
     </style>
 </body>
 </html>
