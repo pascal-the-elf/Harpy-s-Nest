@@ -110,6 +110,7 @@
             ["關卡", "開放時間", "關閉時間"].forEach((item, i) => {
                 let th = document.createElement("th");
                 th.innerHTML = item;
+                if(i > 0) th.style.minWidth = "76px";
                 stages_header.appendChild(th);
             });
             stages.appendChild(stages_header);
