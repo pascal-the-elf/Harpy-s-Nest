@@ -110,7 +110,7 @@
             ["關卡", "開放時間", "關閉時間"].forEach((item, i) => {
                 let th = document.createElement("th");
                 th.innerHTML = item;
-                if(i > 0) th.style.minWidth = "80px";
+                if(i > 0) th.style.minWidth = "82px";
                 else th.style.maxWidth = "50%";
                 stages_header.appendChild(th);
             });
@@ -144,6 +144,7 @@
                     if((item.type || "").includes("地獄級")) stage_type_class.push("rainbow-text");
                     else stage_type_class.push("text-muted");
                     stage.innerHTML = `<small class="${stage_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
+                    stage.classList.add("stage");
                     stage.addEventListener("click", function() {
                         let new_win = window.open("url", "_blank");
                         new_win.location = "https://tos.fandom.com/zh/wiki/" + item.stage;
@@ -343,16 +344,18 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-    .stage-table, .stage-table > thead, .stage-table > thead > tr, .stage-table > tbody, .stage-table > tbody > tr {
+    .stage-table, .stage-table > thead, .stage-table > thead > tr, .stage-table > tbody, .stage-table > tbody > tr, .stage-table > tr {
         width: 100%;
         position: relative;
     }
     .stage-type {
         white-space: nowrap;
-        overflow: auto;
-        max-width: 40vw;
     }
-    
+    .stage {
+        position: relative;
+        overflow: auto;
+        max-width: 50%;
+    }
     </style>
 </body>
 </html>
