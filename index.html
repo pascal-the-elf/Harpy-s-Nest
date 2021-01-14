@@ -138,7 +138,10 @@
                         end.classList.add("text-success");
                     }
 
-                    stage.innerHTML = `<small class="text-muted">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
+                    let stage_type_class = [];
+                    if((item.type || "").includes("地獄級")) stage_type_class.push("rainbow-text");
+                    else stage_type_class.push("text-muted");
+                    stage.innerHTML = `<small class="${stage_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
                     stage.addEventListener("click", function() {
                         let new_win = window.open("url", "_blank");
                         new_win.location = "https://tos.fandom.com/zh/wiki/" + item.stage;
@@ -332,6 +335,11 @@
         top: 25px;
         left: 25px;
         box-sizing: content-box;
+    }
+    .rainbow-text {
+        background: linear-gradient(to right, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     </style>
 </body>
