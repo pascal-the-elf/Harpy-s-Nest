@@ -231,7 +231,7 @@
                             api.card.get(cards)
                             .then(data => {
                                 let cont = "";
-                                cont += `${rate_up?`<b class="text-warning">`:""}機率加倍：${moment(item.detail.rate_up.start).format("MoDo")} ~ ${moment(new Date(item.detail.rate_up.end) - 1).format("MoDo")}${rate_up?`</b>`:""}<br><br>`;
+                                cont += `${rate_up?`<b class="rainbow-text">`:""}機率加倍：${moment(item.detail.rate_up.start).format("MoDo")} ~ ${moment(new Date(item.detail.rate_up.end) - 1).format("MoDo")}${rate_up?`</b>`:""}<br><br>`;
                                 cont += `<b>大獎：</b><br>
                                 <a class="text-white" href="./card?id=${item.detail["1%"][0]}">${data[item.detail["1%"][0]].name}</a><br>`;
                                 cont += `<b>二獎：</b><br>
