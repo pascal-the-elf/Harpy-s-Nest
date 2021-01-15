@@ -212,7 +212,10 @@
                         end.classList.add("text-warning");
                     }
 
-                    name.innerHTML = `<small class="text-muted">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.name}`;
+                    let seal_type_class = [];
+                    if(rate_up) seal_type_class.push("rainbow-text");
+                    else seal_type_class.push("text-muted");
+                    name.innerHTML = `<small class="${seal_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.name}`;
                     start.innerHTML = moment(item.start).format("MoDo <br>A hh:mm");
                     end.innerHTML = item.end ? moment(item.end).format("MoDo <br>A hh:mm") : "永久開放";
 
