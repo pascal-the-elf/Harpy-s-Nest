@@ -141,7 +141,7 @@
                     }
 
                     let stage_type_class = ["stage-type"];
-                    if((item.type || "").includes("地獄級")) stage_type_class.push("rainbow-text");
+                    if((item.type || "").includes("地獄級")) stage_type_class.push("rainbow-text", "bold");
                     else stage_type_class.push("text-muted");
                     stage.innerHTML = `<small class="${stage_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
                     stage.classList.add("stage");
@@ -213,7 +213,7 @@
                     }
 
                     let seal_type_class = [];
-                    if(rate_up) seal_type_class.push("rainbow-text");
+                    if(rate_up) seal_type_class.push("rainbow-text", "bold");
                     else seal_type_class.push("text-muted");
                     name.innerHTML = `<small class="${seal_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.name}`;
                     start.innerHTML = moment(item.start).format("MoDo <br>A hh:mm");
@@ -234,7 +234,7 @@
                             api.card.get(cards)
                             .then(data => {
                                 let cont = "";
-                                cont += `${rate_up?`<b class="rainbow-text">`:""}機率加倍：${moment(item.detail.rate_up.start).format("MoDo")} ~ ${moment(new Date(item.detail.rate_up.end) - 1).format("MoDo")}${rate_up?`</b>`:""}<br><br>`;
+                                cont += `${rate_up?`<b class="rainbow-text bold white-shadow">`:""}機率加倍：${moment(item.detail.rate_up.start).format("MoDo")} ~ ${moment(new Date(item.detail.rate_up.end) - 1).format("MoDo")}${rate_up?`</b>`:""}<br><br>`;
                                 cont += `<b>大獎：</b><br>
                                 <a class="text-white" href="./card?id=${item.detail["1%"][0]}">${data[item.detail["1%"][0]].name}</a><br>`;
                                 cont += `<b>二獎：</b><br>
@@ -347,6 +347,9 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    .bold {
+        font-weight: bold;
+    }
     .stage-table, .stage-table > thead, .stage-table > thead > tr, .stage-table > tbody, .stage-table > tbody > tr, .stage-table > tr {
         width: 100%;
         position: relative;
@@ -362,6 +365,10 @@
         overflow: auto;
         max-width: 50%;
     }
+    .white-shadow {
+        text-shadow: 0 0 0px #ffffff33;
+    }
+    
     </style>
 </body>
 </html>
