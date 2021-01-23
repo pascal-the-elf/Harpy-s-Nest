@@ -141,7 +141,7 @@
                     }
 
                     let stage_type_class = ["stage-type"];
-                    if((item.type || "").includes("地獄級")) stage_type_class.push("rainbow-text", "bold");
+                    if(/(地獄)|(夢魘)級/g.test(item.type || "")) stage_type_class.push("rainbow-text", "bold");
                     else stage_type_class.push("text-muted");
                     stage.innerHTML = `<small class="${stage_type_class.join(" ")}">${item.type || ""}</small>${item.type ? `<br>` : ""}${item.stage}`;
                     stage.classList.add("stage");
@@ -368,7 +368,7 @@
     .white-shadow {
         text-shadow: 0 0 0px #ffffff33;
     }
-    
+
     </style>
 </body>
 </html>
